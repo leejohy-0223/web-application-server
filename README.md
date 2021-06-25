@@ -17,7 +17,7 @@
 ### 요구사항 1 - http://localhost:8080/index.html 로 접속시 응답
 1. 우선 마크다운에 대해서 알게 됨
 2. java.nio.files.Files
-   * 기본 java.io인 File외에 static 메서드로 복잡한 처리르 하기위한 클래스
+   * 기본 java.io인 File외에 static 메서드로 복잡한 처리를 하기 위한 클래스
    * run()에서 readAllByte를 통해 해당 url에 있는 모든 byte를 읽어온다.
    * readAllBytes(new File("./webapp" + url).toPath()) 또는 readAllBytes(Paths.get("./webapp" + url))로 경로를 지정할 수 있다.
    * File의 toPath()를 통해 **Path** 객체 얻을 수 있다.
