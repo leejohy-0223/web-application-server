@@ -31,7 +31,7 @@ public class RequestHandler extends Thread {
             // 정답 코드
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             String line = br.readLine();
-            log.debug("request line : {}", line);
+//            log.debug("request line : {}", line);
 
             if(line == null) {
                 return;
@@ -42,7 +42,6 @@ public class RequestHandler extends Thread {
 //                log.debug("header : {}", line);
 //            }
 
-            //아래는 기존 코드
             String url = HttpRequestUtils.getUrl(line);
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());

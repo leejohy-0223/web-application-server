@@ -20,6 +20,19 @@ public class HttpRequestUtils {
         log.debug("request path : {}", path);
         return path;
     }
+
+    public static String getPath(String line) {
+        String url = line;
+        int index = url.indexOf("?");
+        return url.substring(0, index);
+    }
+
+    public static String getParam(String line) {
+        String url = line;
+        int index = url.indexOf("?");
+        return url.substring(index + 1);
+    }
+
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임

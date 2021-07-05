@@ -11,7 +11,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.StringTokenizer;
+
+import static org.junit.Assert.assertEquals;
 
 public class RequestHandlerTest {
 
@@ -26,7 +27,7 @@ public class RequestHandlerTest {
         String tmp = "get / http/1.1";
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(tmp.getBytes())));
         String tmp2 = ioUtils.readData(br, tmp.length());
-        Assert.assertEquals(tmp, tmp2);
+        assertEquals(tmp, tmp2);
 
     }
 
@@ -34,22 +35,32 @@ public class RequestHandlerTest {
     public void Request_header_url추출() throws IOException {
         String tmp = "get /index.html http/1.1";
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(tmp.getBytes())));
-        Assert.assertEquals("/index.html", ioUtils.extract_url(br, tmp.length()));
+        assertEquals("/index.html", ioUtils.extract_url(br, tmp.length()));
     }
 
     @Test
     public void url_get() throws IOException {
-        String tmp = "/user/create?userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com";
-        StringTokenizer st = new StringTokenizer(tmp, "?");
-        st.nextToken();
-        Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(st.nextToken());
-        Assert.assertEquals("leejo", queryStringMap.get("userId"));
+        String tmp = "GET /user/create?userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com HTTP/1.1";
+        String url = HttpRequestUtils.getUrl(tmp);
+        String param = HttpRequestUtils.getParam(url);
+        Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(param);
+        assertEquals("leejo", queryStringMap.get("userId"));
 
     }
 
     @Test
-    public void getmethod() throws IOException {
-        String tmp = "get /index.html http/1.1";
-        Assert.assertEquals("get", ioUtils.getMethod(tmp));
+    public void getpath() {
+        String tmp = "GET /user/create?userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com HTTP/1.1";
+        String url = HttpRequestUtils.getUrl(tmp);
+        String path = HttpRequestUtils.getPath(url);
+        assertEquals("/user/create", path);
+    }
+
+    @Test
+    public void getparam() {
+        String tmp = "GET /user/create?userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com HTTP/1.1";
+        String url = HttpRequestUtils.getUrl(tmp);
+        String path = HttpRequestUtils.getParam(url);
+        assertEquals("userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com", path);
     }
 }
