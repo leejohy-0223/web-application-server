@@ -1,5 +1,7 @@
 package webserver;
 
+import db.DataBase;
+import model.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,5 +64,14 @@ public class RequestHandlerTest {
         String url = HttpRequestUtils.getUrl(tmp);
         String path = HttpRequestUtils.getParam(url);
         assertEquals("userId=leejo&password=whgud&name=%EC%9D%B4%EC%A1%B0%ED%98%95&email=leejohy%40naver.com", path);
+    }
+
+    @Test
+    public void 유효_아이디_확인() {
+        DataBase.addUser(new User("lee", "dkask", "johy", "aa@aa"));
+        if(!DataBase.findUserById("lee").equals("")) {
+            User tmp = DataBase.findUserById("lee");
+            assertEquals(tmp.getPassword(), "dkask");
+        }
     }
 }

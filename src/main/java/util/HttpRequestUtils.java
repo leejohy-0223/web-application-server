@@ -17,7 +17,7 @@ public class HttpRequestUtils {
         String[] splited = firstLine.split(" ");
 
         String path = splited[1];
-        log.debug("request path : {}", path);
+//        log.debug("request path : {}", path);
         return path;
     }
 
