@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -11,6 +12,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -36,13 +38,32 @@ public class RequestHandler extends Thread {
             if(line == null) {
                 return;
             }
-
-//            while (!line.equals("")) {
-//                line = br.readLine();
-//                log.debug("header : {}", line);
-//            }
-
             String url = HttpRequestUtils.getUrl(line);
+            Map<String, String> headers = new HashMap<>();
+            while (!line.equals("")) {
+//                log.debug("header : {}", line);
+                line = br.readLine();
+                String[] headerTokens = line.split(": ");
+                if(headerTokens.length == 2) {
+                    headers.put(headerTokens[0], headerTokens[1]);
+                }
+            }
+
+//            log.debug("Content-length : {} ", headers.get("Content-Length"));
+
+
+            // 요구사항 3(POST) 구현 - start
+            if(url.startsWith("/user/create")) {
+                //현재 br read시, 앞에서 헤더는 다 읽었으므 공백 다음인 body 부분을 읽게 된다.
+                String requestBody = IOUtils.readData(br, Integer.valueOf(headers.get("Content-Length")));
+                log.debug("RequestBody : {} ", requestBody);
+                Map<String, String> param = HttpRequestUtils.parseQueryString(requestBody);
+                User user = new User(param.get("userId"), param.get("password"), param.get("name"), param.get("email"));
+                log.debug("User : {}", user);
+                url = "/index.html";
+            }
+            // end
+
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             response200Header(dos, body.length);
