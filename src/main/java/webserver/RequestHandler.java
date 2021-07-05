@@ -4,10 +4,13 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.StringTokenizer;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -24,15 +27,25 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
-            String url = " ";
-            url = extracted(in, url);
-            System.out.println("url : " +  url);
-//            byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            byte[] body = Files.readAllBytes(Paths.get("./webapp" + url));
+
+            // 정답 코드
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            String line = br.readLine();
+            log.debug("request line : {}", line);
+
+            if(line == null) {
+                return;
+            }
+
+//            while (!line.equals("")) {
+//                line = br.readLine();
+//                log.debug("header : {}", line);
+//            }
 
             //아래는 기존 코드
-//            byte[] body = "Hello World!! it is not in html".getBytes();
+            String url = HttpRequestUtils.getUrl(line);
             DataOutputStream dos = new DataOutputStream(out);
+            byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
@@ -40,10 +53,15 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private String extracted(InputStream in, String url) throws IOException {
+    private String getMethod(String tmp) throws IOException {
+        StringTokenizer st = new StringTokenizer(tmp);
+        return st.nextToken();
+    }
+
+    private String extracted(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         String tmp = br.readLine();
-        String tmp2 = extract_url(tmp, tmp.length());
+        String tmp2 = tmp;
         if (tmp == null) {
             return "false";
         }
@@ -74,7 +92,7 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private String extract_url(String tmp, int contentLength) throws IOException {
+    private String extract_url(String tmp) throws IOException {
 
         StringTokenizer st = new StringTokenizer(tmp, " ");
         st.nextToken();
