@@ -74,7 +74,14 @@
 * 크롬 개발자 도구를 통해 이 과정을 확인할 수 있다.
 
 ### 요구사항 6 - stylesheet 적용
-* 
+* 여지껏 responseHeader 메서드에서 content-type을 text/html로 보내고 있었다. 따라서 css 파일임에도 브라우저가 html로 인식하여 정상 동작하지 않았다.
+* 따라서, 응답을 확인하여 css가 포함되어 있는지 본 후, responseHeader를 css용으로 만들어 text/css로 content-type을 수정한다.
 
+  
+### 요구사항 7 - cookie 기반으로 유저 데이터 조회
+* 요구사항 5에서 설정된 cookie를 기반으로, 전체 회원가입 된 사용자의 리스트를 출력할 수 있다.
+* Header에서 cookie가 true인지 확인한 후, DataBase.findAll을 통해 전체 유저 정보를 받아 동적으로 html을 만들어 뿌려주는 방식이다.
+  
+  
 ### heroku 서버에 배포 후
 * 
