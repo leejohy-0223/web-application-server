@@ -4,9 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import db.DataBase;
 import model.User;
@@ -81,9 +79,31 @@ public class RequestHandler extends Thread {
                     response302HeaderWithCookie(dos, "logined=true");
                 } else {
                     log.debug("Password Mismatch");
-                    response302HeaderWithCookie(dos, "logined=false");
+                    response302HeaderWithCookieFail(dos, "logined=false");
                 }
 
+                // 요구사항 6 - 사용자 목록 출력
+            } else if (url.equals("/user/list")) {
+                if(headers.get("Cookie").equals("logined=true")) {
+                    Collection<User> users = DataBase.findAll();
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<table border='1'>");
+                    for(User user : users) {
+                        sb.append("<tr>");
+                        sb.append("<td>" + user.getUserId() + "</td>");
+                        sb.append("<td>" + user.getName() + "</td>");
+                        sb.append("<td>" + user.getEmail() + "</td>");
+                        sb.append("</tr>");
+                    }
+                    sb.append("</table>");
+                    byte[] body = sb.toString().getBytes();
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+                } else {
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response302Header(dos);
+                }
             } else {
                 DataOutputStream dos = new DataOutputStream(out);
                 byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
@@ -113,6 +133,17 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
             dos.writeBytes("Location: /index.html \r\n");
+            dos.writeBytes("Set-Cookie: "+ cookie + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302HeaderWithCookieFail(DataOutputStream dos, String cookie) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: /user/login_failed.html \r\n");
             dos.writeBytes("Set-Cookie: "+ cookie + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
