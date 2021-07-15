@@ -2,6 +2,7 @@ package webserver;
 
 import db.DataBase;
 import http.HttpRequest;
+import http.HttpResponse;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 
             HttpRequest request = new HttpRequest(in);
+            HttpResponse response = new HttpResponse(out);
             String path = getDefaultPath(request.getPath());
 
             if ("/user/create".equals(path)) {
@@ -39,20 +41,27 @@ public class RequestHandler extends Thread {
                         request.getParameter("email"));
                 log.debug("user : {}", user);
                 DataBase.addUser(user);
-                DataOutputStream dos = new DataOutputStream(out);
-                response302Header(dos);
+//                DataOutputStream dos = new DataOutputStream(out);
+//                response302Header(dos);
+
+                response.sendRedirect("/index.html");
+
             } else if ("/user/login".equals(path)) {
                 User user = DataBase.findUserById(
                         request.getParameter("userId"));
                 if (user != null) {
                     if (user.login(request.getParameter("password"))) {
-                        DataOutputStream dos = new DataOutputStream(out);
-                        response302LoginSuccessHeader(dos);
+//                        DataOutputStream dos = new DataOutputStream(out);
+//                        response302LoginSuccessHeader(dos);
+                        response.addHeader("Set-Cookie", "logined=true");
+                        response.sendRedirect("/index.html");
                     } else {
-                        responseResource(out, "/user/login_failed.html");
+//                        responseResource(out, "/user/login_failed.html");
+                        response.sendRedirect("/user/logined_failed.html");
                     }
                 } else {
-                    responseResource(out, "/user/login_failed.html");
+//                    responseResource(out, "/user/login_failed.html");
+                    response.sendRedirect("/user/logined_failed.html");
                 }
             } else if ("/user/list".equals(path)) {
                 // Cookie가 존재한다면 getHeader에 의해 logined-true가 isLogin으로 넘어간다.
@@ -62,7 +71,8 @@ public class RequestHandler extends Thread {
 //                }
                 // Cookie 확인을 request에서 처리하도록 리팩토링하였다.
                 if(!request.getCookieStatus()) {
-                    responseResource(out, "/user/login.html");
+//                    responseResource(out, "/user/login.html");
+                    response.sendRedirect("/user/login.html");
                     return;
                 }
                 Collection<User> users = DataBase.findAll();
@@ -76,14 +86,16 @@ public class RequestHandler extends Thread {
                     sb.append("</tr>");
                 }
                 sb.append("</table>");
-                byte[] body = sb.toString().getBytes();
-                DataOutputStream dos = new DataOutputStream(out);
-                response200Header(dos, body.length);
-                responseBody(dos, body);
-            } else if (path.endsWith(".css")) {
-                responseCssResource(out, path);
+//                byte[] body = sb.toString().getBytes();
+//                DataOutputStream dos = new DataOutputStream(out);
+//                response200Header(dos, body.length);
+//                responseBody(dos, body);
+                response.forwardBody(sb.toString());
             } else {
-                responseResource(out, path);
+//                responseResource(out, path);
+                //html, css, js는 여기에서 출력됨. 나머지 url은 위의 로직에서 걸리게 됨.
+                response.forward(path);
+
             }
         } catch (IOException e) {
             log.error(e.getMessage());
