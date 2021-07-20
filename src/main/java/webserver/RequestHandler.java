@@ -33,7 +33,6 @@ public class RequestHandler extends Thread {
 
             HttpRequest request = new HttpRequest(in);
             HttpResponse response = new HttpResponse(out);
-
             Controller controller = RequestMapping.getController(request.getPath());
 
             // mapping 된 컨트롤러가 없다면 html, css, js이므로 헤더랑 바디 붙여서 리턴
