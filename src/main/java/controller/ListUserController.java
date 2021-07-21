@@ -6,6 +6,7 @@ import http.HttpResponse;
 import java.util.Collection;
 import java.util.Map;
 
+import http.HttpSession;
 import model.User;
 import util.HttpRequestUtils;
 import db.DataBase;
@@ -17,6 +18,12 @@ public class ListUserController extends AbstractController {
             response.sendRedirect("/user/login.html");
             return;
         }
+
+        if(!isLogined(request.getSession())) {
+            response.sendRedirect("/user/login.html");
+            return;
+        }
+
 
         Collection<User> users = DataBase.findAll();
         StringBuilder sb = new StringBuilder();
@@ -30,6 +37,14 @@ public class ListUserController extends AbstractController {
         }
         sb.append("</table>");
         response.forwardBody(sb.toString());
+    }
+
+    private static boolean isLogined(HttpSession session) {
+        Object user = session.getAttributes("user");
+        if(user == null) {
+            return false;
+        }
+        return true;
     }
 
     private boolean isLogin(String cookieValue) {

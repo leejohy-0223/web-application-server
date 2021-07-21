@@ -65,6 +65,12 @@ public class HttpRequestUtilsTest {
     }
 
     @Test
+    public void getKey_invalue() throws Exception {
+        Pair pair = HttpRequestUtils.getKeyValue("", "=");
+        assertThat(pair, is(nullValue()));
+    }
+
+    @Test
     public void parseHeader() throws Exception {
         String header = "Content-Length: 59";
         Pair pair = HttpRequestUtils.parseHeader(header);
